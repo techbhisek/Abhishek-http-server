@@ -3,7 +3,7 @@ const fs = require('fs/promises');
 const uuid = require('uuid');
 
 const server = http.createServer((request, respons) => {
-  if (request.method == 'Get' || request.url == '/index.html') {
+  if (request.method == 'Get' || request.url == '/html') {
     respons.setHeader('Content-Tye', 'text/html');
     fs.readFile('index.html').then((data) => {
       respons.end(data);
