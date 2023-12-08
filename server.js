@@ -1,59 +1,57 @@
-const http = require('http');
-const fs = require('fs/promises');
+const express = require('express');
 const uuid = require('uuid');
 
-const server = http.createServer((request, respons) => {
-  if (request.method == 'Get' || request.url == '/index.html') {
-    respons.setHeader('Content-Tye', 'text/html');
-    fs.readFile('index.html').then((data) => {
-      respons.end(data);
-    });
-  } else if (request.url == '/json') {
-    respons.setHeader('Content-Tye', 'json');
-    let data = {
-      slideshow: {
-        author: 'Yours Truly',
-        date: 'date of publication',
-        slides: [
-          {
-            title: 'Wake up to WonderWidgets!',
-            type: 'all',
-          },
-          {
-            items: [
-              'Why <em>WonderWidgets</em> are great',
-              'Who <em>buys</em> WonderWidgets',
-            ],
-            title: 'Overview',
-            type: 'all',
-          },
-        ],
-        title: 'Sample Slide Show',
-      },
-    };
-    respons.end(JSON.stringify(data));
-  } else if (request.url == '/uuid') {
-    respons.setHeader('Content-Type', 'json');
-    let Uuid = uuid.v4();
-    let json = {
-      Uuid,
-    };
-    respons.end(JSON.stringify(json));
-  } else if (request.url.includes('/status/')) {
-    let path = request.url.split('/').pop();
-    respons.statusCode = path;
-    respons.end(path);
-  } else if (request.url.includes('/delay/')) {
-    let delay = request.url.split('/').pop();
+const app = express();
 
-    setTimeout(() => {
-      respons.end('times is ' + delay + 'sec');
-    }, delay * 1000);
-  } else {
-    respons.statusCode = 404;
-    respons.end('not found');
-  }
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.get('/html', (req, res) => {
+  res.sendFile('/home/abhishek/Mountblue/httpProject/index.html');
 });
-server.listen(3000, '127.0.0.1', () => {
-  console.log('sucess full');
+
+app.get('/json', (req, res) => {
+  res.json({
+    slideshow: {
+      author: 'Yours Truly',
+      date: 'date of publication',
+      slides: [
+        {
+          title: 'Wake up to WonderWidgets!',
+          type: 'all',
+        },
+        {
+          items: [
+            'Why <em>WonderWidgets</em> are great',
+            'Who <em>buys</em> WonderWidgets',
+          ],
+          title: 'Overview',
+          type: 'all',
+        },
+      ],
+      title: 'Sample Slide Show',
+    },
+  });
+});
+
+app.get('/uuid', (req, res) => {
+  const UUID = uuid.v4();
+  res.json({ uuid: UUID });
+});
+
+app.get('/status/:code', (req, res) => {
+  res.statusCode = parseInt(req.params.code);
+  res.send({
+    msg: `returned with the given status code ${req.params.code}`,
+  });
+});
+
+app.get('/delay/:seconds', (req, res) => {
+  setTimeout(() => {
+    res.send(`response send in ${req.params.seconds} seconds`);
+  }, req.params.seconds * 1000);
+});
+
+app.listen('3000', () => {
+  console.log('sucessfully connected');
 });
